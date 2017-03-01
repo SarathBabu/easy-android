@@ -2,7 +2,8 @@ package com.sarath.easyandroid.sqlite;
 
 import android.database.Cursor;
 
-import com.sarath.sqlitelibrary.annotation.Column;
+
+import com.sarath.easyandroid.sqlite.annotation.Column;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;

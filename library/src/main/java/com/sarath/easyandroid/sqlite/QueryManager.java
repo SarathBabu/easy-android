@@ -6,10 +6,10 @@ import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.sarath.sqlitelibrary.annotation.Column;
-import com.sarath.sqlitelibrary.annotation.Table;
-import com.sarath.sqlitelibrary.exception.NoColumnAnnotationException;
-import com.sarath.sqlitelibrary.exception.NoTableAnnotationException;
+
+import com.sarath.easyandroid.sqlite.annotation.Column;
+import com.sarath.easyandroid.sqlite.annotation.Table;
+import com.sarath.easyandroid.sqlite.exception.NoTableAnnotationException;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;

@@ -12,6 +12,8 @@ import java.io.InputStreamReader;
 
 /**
  * Created by sarath on 22/11/16.
+ *
+ * Creates or upgrades database
  */
 
 public class DatabaseManager {
@@ -32,6 +34,12 @@ public class DatabaseManager {
         }
     }
 
+    /**
+     * Creates the database by executing the queries in resource R.raw.create_db
+     *
+     * @param context
+     * @param database
+     */
     public static void createDB(Context context, SQLiteDatabase database){
         int identifier = context.getResources().getIdentifier(CREATE, "raw",
                 context.getPackageName());
@@ -43,6 +51,15 @@ public class DatabaseManager {
         }
     }
 
+    /**
+     * Updates the database by executing the queries in resources R.raw.upgrade_db_{oldVersion},...
+     * R.raw.upgrade_db_{newVersion}
+     *
+     * @param context
+     * @param database
+     * @param oldVersion
+     * @param newVersion
+     */
     public static void upgradeDB(Context context, SQLiteDatabase database, int oldVersion,
                                  int newVersion){
 

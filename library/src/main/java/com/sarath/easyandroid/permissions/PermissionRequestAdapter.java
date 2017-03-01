@@ -10,9 +10,11 @@ import android.net.Uri;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.util.SparseArray;
 
-import com.sarath.easyandroid.android.R;
+
+import com.sarath.easyandroid.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,52 +23,92 @@ import java.util.Vector;
 /**
  * Created by sarath on 23/2/17.
  *
- * Adapter implementation for PermissionRequester
+ * Use @PermissionRequestAdapter{@link PermissionRequestAdapter} to request for permissions on
+ * Activity
  */
 
-public class PermissionRequesterAdapter {
+public class PermissionRequestAdapter {
 
     private static final int SETTINGS_ACTIVITY_REQUEST_CODE = 3272;
-    private final PermissionRequester requester;
+    private final PermissionRequestCallback requester;
     private List<PermissionDetails> permissionDetailsList;
     private SparseArray<List<String>> deniedPermissions = new SparseArray<>();
     private Vector<AlertDialog> dialogs = new Vector<>();
     private Activity activity;
 
-    private PermissionRequesterAdapter(PermissionRequester requester) {
+    /**
+     *
+     * @param requester callback for permission request
+     */
+    private PermissionRequestAdapter(PermissionRequestCallback requester) {
         permissionDetailsList = new ArrayList<>();
         this.requester = requester;
     }
 
+    /**
+     * User builder to create  @{@link PermissionRequestAdapter} object.
+     */
     public static class Builder{
-        private PermissionRequesterAdapter requesterAdapter;
+        private PermissionRequestAdapter requesterAdapter;
 
-        public Builder(PermissionRequester requester) {
-            requesterAdapter = new PermissionRequesterAdapter(requester);
+        /**
+         *
+         * @param requester callback for permission request
+         */
+        public Builder(PermissionRequestCallback requester) {
+            requesterAdapter = new PermissionRequestAdapter(requester);
         }
 
+        /**
+         *
+         * @param explanation tell why you want this permission
+         * @param isMandatory is this permission is mandatory. Mandatory permission will be asked
+         *                    on every permission request call by @{@link PermissionRequestAdapter} even if the user rejected the
+         *                    permission earlier.
+         * @return
+         */
         public Builder addLocationPermission(String explanation,boolean isMandatory){
             requesterAdapter.permissionDetailsList.add(new PermissionDetails(Manifest.permission.ACCESS_FINE_LOCATION,
                     explanation,isMandatory));
             return this;
         }
+        /**
+         *
+         * @param explanation tell why you want this permission
+         * @param isMandatory is this permission is mandatory. Mandatory permission will be asked
+         *                    on every permission request call by @{@link PermissionRequestAdapter} even if the user rejected the
+         *                    permission earlier.
+         * @return
+         */
         public Builder addCameraPermission(String explanation,boolean isMandatory){
             requesterAdapter.permissionDetailsList.add(new PermissionDetails(Manifest.permission.CAMERA,
                     explanation,isMandatory));
             return this;
         }
-
+        /**
+         *
+         * @param explanation tell why you want this permission
+         * @param isMandatory is this permission is mandatory. Mandatory permission will be asked
+         *                    on every permission request call by @{@link PermissionRequestAdapter} even if the user rejected the
+         *                    permission earlier.
+         * @return
+         */
         public Builder addStoragePermission(String explanation,boolean isMandatory){
             requesterAdapter.permissionDetailsList.add(new PermissionDetails(Manifest.permission.WRITE_EXTERNAL_STORAGE,
                     explanation,isMandatory));
             return this;
         }
 
-        public PermissionRequesterAdapter build(){
+        public PermissionRequestAdapter build(){
             return requesterAdapter;
         }
     }
 
+    /**
+     * Request permissions which are set for the adapter
+     * @param activity activity from which the request is invoked
+     * @param requestCode request code
+     */
     public void request(Activity activity, int requestCode){
         this.activity = activity;
         ActivityCompat.requestPermissions(activity, getPermissionsIds(), requestCode);
@@ -81,7 +123,14 @@ public class PermissionRequesterAdapter {
         return permissions;
     }
 
-
+    /**
+     * Call this method from {@link Activity#onActivityResult(int, int, Intent)} or
+     * {@link android.support.v4.app.Fragment#onActivityResult(int, int, Intent)}
+     *
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode){
             case SETTINGS_ACTIVITY_REQUEST_CODE:
@@ -90,7 +139,13 @@ public class PermissionRequesterAdapter {
         }
     }
 
-
+    /**
+     * Call this method from @{@link Activity#onRequestPermissionsResult(int, String[], int[])}
+     *
+     * @param requestCode
+     * @param permissions
+     * @param grantResults
+     */
     public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
         deniedPermissions.put(requestCode, new ArrayList<String>());
         for (int i=0; i< grantResults.length; i++){
@@ -103,6 +158,9 @@ public class PermissionRequesterAdapter {
         enforcePermissionsIfNeeded(requestCode);
     }
 
+    /**
+     * Call this method from  {@link Activity#onStop()} or {@link Fragment#onStop()}
+     */
     public void onStop(){
         for(AlertDialog dialog:dialogs)
             if (dialog.isShowing()) dialog.dismiss();

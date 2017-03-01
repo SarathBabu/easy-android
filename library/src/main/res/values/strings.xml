@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Library</string>
+    <string name="open_settings">Open Settings</string>
+    <string name="permission">Permission</string>
+</resources>

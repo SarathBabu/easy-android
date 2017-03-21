@@ -1,0 +1,29 @@
+{
+    "docs": [
+        {
+            "location": "/", 
+            "text": "Welcome to Easy-Android\n\n\nEasy-Android is a lightweight library for android application. It have sections for database, network and permissions operations.", 
+            "title": "Home"
+        }, 
+        {
+            "location": "/#welcome-to-easy-android", 
+            "text": "Easy-Android is a lightweight library for android application. It have sections for database, network and permissions operations.", 
+            "title": "Welcome to Easy-Android"
+        }, 
+        {
+            "location": "/network/", 
+            "text": "During the running of application the network may go off and reconnect at multiple times, and we may want to get the status of the network instanataniously in \nActiviy\n or \nFragment\n. \nActivity\n or \nFragment\n can implement \nNetworkChangeTrackerListener\n and create instance of the \nNetworkChangeTracker\n to make it possible to get the instantanious update about the network change.\n\n\nCall \nNetworkChangeTracker.startTracking(Context)\n to start the network status tracking and \nNetworkChangeTracker.stopTracking(Context)\n when the tracking no more needed.\n\n\nExample for enabling tracking in \nActivity\n is given bellow.\n\n\npublic class MainActivity extends AppCompatActivity implements NetworkChangeTrackerListener{\n\n    NetworkChangeTracker tracker;\n\n    @Override\n    protected void onCreate(Bundle savedInstanceState) {\n        super.onCreate(savedInstanceState);\n        tracker = NetworkChangeTracker(this)\n    }\n\n    @Override\n    public void onStart(){\n        tracker.startTracking(MainActivity.this);\n    }\n\n\n    @Override\n    public void onPasue(){\n        tracker.stopTracking(MainActivity.this);\n    }\n\n    @Override\n    void onNetworkChange(NetworkInfoGroup networkInfoGroup){\n\n    }\n}", 
+            "title": "Network"
+        }, 
+        {
+            "location": "/permission/", 
+            "text": "From Marshmallow onwrads the permission request is during runtime. To make the permission request easy in an \nActivity\n we can use", 
+            "title": "Permissions"
+        }, 
+        {
+            "location": "/database/", 
+            "text": "", 
+            "title": "Database"
+        }
+    ]
+}

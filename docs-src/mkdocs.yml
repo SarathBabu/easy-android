@@ -1,2 +1,7 @@
 site_name: Easy Android
+pages:
+  - Home: index.md
+  - Network: network.md
+  - Permissions: permission.md
+  - Database: database.md
 theme: readthedocs

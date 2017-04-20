@@ -1,0 +1,1 @@
+**Easy Database** module presently has the functionalities for SQLite databse creation and migration. It will allow the developer to keep separate SQL DDL files for database creation and the migration. Developers don't need to put the DDL statements into the source code.

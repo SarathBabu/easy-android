@@ -1,10 +1,12 @@
-During the running of application the network may go off and reconnect at multiple times, and we may want to get the status of the network instanataniously in `Activiy` or `Fragment`. `Activity` or `Fragment` can implement `NetworkChangeTrackerListener` and create instance of the `NetworkChangeTracker` to make it possible to get the instantanious update about the network change.
+## Introduction
+Developers can use the **Easy Network** module to get instant updates about the change in network state in `Activiy` or `Fragment`. `Activity` or `Fragment` can implement `NetworkChangeTrackerListener` and create instance of the `NetworkChangeTracker` to make it possible to get the instantanious update about the network change.
 
 Call `NetworkChangeTracker.startTracking(Context)` to start the network status tracking and `NetworkChangeTracker.stopTracking(Context)` when the tracking no more needed.
 
-Example for enabling tracking in `Activity` is given bellow.
+### Eaxample
+Example below will show how to use `NetworkChangeTracker` in an `Activity`.
 
-    public class MainActivity extends AppCompatActivity implements NetworkChangeTrackerListener{
+    public class MainActivity extends AppCompatActivity implements NetworkChangeTrackerListener {
 
         NetworkChangeTracker tracker;
 
@@ -30,3 +32,4 @@ Example for enabling tracking in `Activity` is given bellow.
 
         }
     }
+

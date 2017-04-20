@@ -1,7 +1,8 @@
 site_name: Easy Android
 pages:
   - Home: index.md
-  - Network: network.md
-  - Permissions: permission.md
-  - Database: database.md
+  - Easy Network: network.md
+  - Easy Permissions: permission.md
+  - Easy Database: database.md
+  - Easy Location: location.md
 theme: readthedocs

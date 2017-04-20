@@ -5,26 +5,26 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="None">
   
-  <link rel="shortcut icon" href="./img/favicon.ico">
-  <title>Home - Easy Android</title>
+  
+  <link rel="shortcut icon" href="../img/favicon.ico">
+  <title>Easy Location - Easy Android</title>
   <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
 
-  <link rel="stylesheet" href="./css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="./css/theme_extra.css" type="text/css" />
-  <link rel="stylesheet" href="./css/highlight.css">
+  <link rel="stylesheet" href="../css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="../css/highlight.css">
   
   <script>
     // Current page data
-    var mkdocs_page_name = "Home";
-    var mkdocs_page_input_path = "index.md";
-    var mkdocs_page_url = "/";
+    var mkdocs_page_name = "Easy Location";
+    var mkdocs_page_input_path = "location.md";
+    var mkdocs_page_url = "/location/";
   </script>
   
-  <script src="./js/jquery-2.1.1.min.js"></script>
-  <script src="./js/modernizr-2.8.3.min.js"></script>
-  <script type="text/javascript" src="./js/highlight.pack.js"></script> 
+  <script src="../js/jquery-2.1.1.min.js"></script>
+  <script src="../js/modernizr-2.8.3.min.js"></script>
+  <script type="text/javascript" src="../js/highlight.pack.js"></script> 
   
 </head>
 
@@ -35,9 +35,9 @@
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
       <div class="wy-side-nav-search">
-        <a href="." class="icon icon-home"> Easy Android</a>
+        <a href=".." class="icon icon-home"> Easy Android</a>
         <div role="search">
-  <form id ="rtd-search-form" class="wy-form" action="./search.html" method="get">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
   </form>
 </div>
@@ -47,35 +47,32 @@
 	<ul class="current">
 	  
           
+            <li class="toctree-l1">
+		
+    <a class="" href="..">Home</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../network/">Easy Network</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../permission/">Easy Permissions</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../database/">Easy Database</a>
+	    </li>
+          
             <li class="toctree-l1 current">
 		
-    <a class="current" href=".">Home</a>
+    <a class="current" href="./">Easy Location</a>
     <ul class="subnav">
             
-    <li class="toctree-l2"><a href="#welcome-to-easy-android">Welcome to Easy-Android</a></li>
-    
-
     </ul>
-	    </li>
-          
-            <li class="toctree-l1">
-		
-    <a class="" href="network/">Easy Network</a>
-	    </li>
-          
-            <li class="toctree-l1">
-		
-    <a class="" href="permission/">Easy Permissions</a>
-	    </li>
-          
-            <li class="toctree-l1">
-		
-    <a class="" href="database/">Easy Database</a>
-	    </li>
-          
-            <li class="toctree-l1">
-		
-    <a class="" href="location/">Easy Location</a>
 	    </li>
           
         </ul>
@@ -88,7 +85,7 @@
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
         <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href=".">Easy Android</a>
+        <a href="..">Easy Android</a>
       </nav>
 
       
@@ -96,11 +93,11 @@
         <div class="rst-content">
           <div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
-    <li><a href=".">Docs</a> &raquo;</li>
+    <li><a href="..">Docs</a> &raquo;</li>
     
       
     
-    <li>Home</li>
+    <li>Easy Location</li>
     <li class="wy-breadcrumbs-aside">
       
     </li>
@@ -110,9 +107,8 @@
           <div role="main">
             <div class="section">
               
-                <h1 id="welcome-to-easy-android">Welcome to Easy-Android</h1>
-<p>Easy-Android is a lightweight library for android application. It has module for database operations, network state tracking, runtime permission requests and for fetching location data.</p>
-<p>Insted on depending on inheritance these modules are based on composition, So you can easily add or remove the functionalities of these modules.</p>
+                <p>For application which need to access the device location can use our <strong>Easy Location</strong> module, which will make it easy to get the information about the last known location like latitude, longutude and address. It also uses the <strong>Easy Permissions</strong> while requesting for the location data, which will make it easy with runtime permissions.</p>
+<p>Developers can use the <code>LocationTracker</code> class in the activity where they want to request for the permissions. This class works along with the <code>PermissionRequestAdapter</code> to handle the runtime permission requesting for devices with Marshmallow and above.</p>
               
             </div>
           </div>
@@ -120,8 +116,8 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="network/" class="btn btn-neutral float-right" title="Easy Network">Next <span class="icon icon-circle-arrow-right"></span></a>
       
+        <a href="../database/" class="btn btn-neutral" title="Easy Database"><span class="icon icon-circle-arrow-left"></span> Previous</a>
       
     </div>
   
@@ -147,17 +143,12 @@
     <span class="rst-current-version" data-toggle="rst-current-version">
       
       
+        <span><a href="../database/" style="color: #fcfcfc;">&laquo; Previous</a></span>
       
-        <span style="margin-left: 15px"><a href="network/" style="color: #fcfcfc">Next &raquo;</a></span>
       
     </span>
 </div>
-    <script src="./js/theme.js"></script>
+    <script src="../js/theme.js"></script>
 
 </body>
 </html>
-
-<!--
-MkDocs version : 0.16.3
-Build Date UTC : 2017-04-20 11:38:00
--->

@@ -2,28 +2,43 @@
     "docs": [
         {
             "location": "/", 
-            "text": "Welcome to Easy-Android\n\n\nEasy-Android is a lightweight library for android application. It have sections for database, network and permissions operations.", 
+            "text": "Welcome to Easy-Android\n\n\nEasy-Android is a lightweight library for android application. It has module for database operations, network state tracking, runtime permission requests and for fetching location data.\n\n\nInsted on depending on inheritance these modules are based on composition, So you can easily add or remove the functionalities of these modules.", 
             "title": "Home"
         }, 
         {
             "location": "/#welcome-to-easy-android", 
-            "text": "Easy-Android is a lightweight library for android application. It have sections for database, network and permissions operations.", 
+            "text": "Easy-Android is a lightweight library for android application. It has module for database operations, network state tracking, runtime permission requests and for fetching location data.  Insted on depending on inheritance these modules are based on composition, So you can easily add or remove the functionalities of these modules.", 
             "title": "Welcome to Easy-Android"
         }, 
         {
             "location": "/network/", 
-            "text": "During the running of application the network may go off and reconnect at multiple times, and we may want to get the status of the network instanataniously in \nActiviy\n or \nFragment\n. \nActivity\n or \nFragment\n can implement \nNetworkChangeTrackerListener\n and create instance of the \nNetworkChangeTracker\n to make it possible to get the instantanious update about the network change.\n\n\nCall \nNetworkChangeTracker.startTracking(Context)\n to start the network status tracking and \nNetworkChangeTracker.stopTracking(Context)\n when the tracking no more needed.\n\n\nExample for enabling tracking in \nActivity\n is given bellow.\n\n\npublic class MainActivity extends AppCompatActivity implements NetworkChangeTrackerListener{\n\n    NetworkChangeTracker tracker;\n\n    @Override\n    protected void onCreate(Bundle savedInstanceState) {\n        super.onCreate(savedInstanceState);\n        tracker = NetworkChangeTracker(this)\n    }\n\n    @Override\n    public void onStart(){\n        tracker.startTracking(MainActivity.this);\n    }\n\n\n    @Override\n    public void onPasue(){\n        tracker.stopTracking(MainActivity.this);\n    }\n\n    @Override\n    void onNetworkChange(NetworkInfoGroup networkInfoGroup){\n\n    }\n}", 
-            "title": "Network"
+            "text": "Introduction\n\n\nDevelopers can use the \nEasy Network\n module to get instant updates about the change in network state in \nActiviy\n or \nFragment\n. \nActivity\n or \nFragment\n can implement \nNetworkChangeTrackerListener\n and create instance of the \nNetworkChangeTracker\n to make it possible to get the instantanious update about the network change.\n\n\nCall \nNetworkChangeTracker.startTracking(Context)\n to start the network status tracking and \nNetworkChangeTracker.stopTracking(Context)\n when the tracking no more needed.\n\n\nEaxample\n\n\nExample below will show how to use \nNetworkChangeTracker\n in an \nActivity\n.\n\n\npublic class MainActivity extends AppCompatActivity implements NetworkChangeTrackerListener {\n\n    NetworkChangeTracker tracker;\n\n    @Override\n    protected void onCreate(Bundle savedInstanceState) {\n        super.onCreate(savedInstanceState);\n        tracker = NetworkChangeTracker(this)\n    }\n\n    @Override\n    public void onStart(){\n        tracker.startTracking(MainActivity.this);\n    }\n\n\n    @Override\n    public void onPasue(){\n        tracker.stopTracking(MainActivity.this);\n    }\n\n    @Override\n    void onNetworkChange(NetworkInfoGroup networkInfoGroup){\n\n    }\n}", 
+            "title": "Easy Network"
+        }, 
+        {
+            "location": "/network/#introduction", 
+            "text": "Developers can use the  Easy Network  module to get instant updates about the change in network state in  Activiy  or  Fragment .  Activity  or  Fragment  can implement  NetworkChangeTrackerListener  and create instance of the  NetworkChangeTracker  to make it possible to get the instantanious update about the network change.  Call  NetworkChangeTracker.startTracking(Context)  to start the network status tracking and  NetworkChangeTracker.stopTracking(Context)  when the tracking no more needed.", 
+            "title": "Introduction"
+        }, 
+        {
+            "location": "/network/#eaxample", 
+            "text": "Example below will show how to use  NetworkChangeTracker  in an  Activity .  public class MainActivity extends AppCompatActivity implements NetworkChangeTrackerListener {\n\n    NetworkChangeTracker tracker;\n\n    @Override\n    protected void onCreate(Bundle savedInstanceState) {\n        super.onCreate(savedInstanceState);\n        tracker = NetworkChangeTracker(this)\n    }\n\n    @Override\n    public void onStart(){\n        tracker.startTracking(MainActivity.this);\n    }\n\n\n    @Override\n    public void onPasue(){\n        tracker.stopTracking(MainActivity.this);\n    }\n\n    @Override\n    void onNetworkChange(NetworkInfoGroup networkInfoGroup){\n\n    }\n}", 
+            "title": "Eaxample"
         }, 
         {
             "location": "/permission/", 
-            "text": "From Marshmallow onwrads the permission request is during runtime. To make the permission request easy in an \nActivity\n we can use", 
-            "title": "Permissions"
+            "text": "The \nEasy Permission\n module makes it easy to request for permissions during runtime. It can mark the any permission as madatory ifrequired, so that user will be promted for premission even if he denied the premission earlier. It also directes the user to the setting page so that he can eanable the permissions there. \n\n\nWhenever the user enables the permissions the callbacks will help the developer to continue with the pending operations if any. For example on a button click if user is asked to allow camera permision, and once the user allows the premission we can make the app directly go the camera operation instead of making the user to click the button once angain.", 
+            "title": "Easy Permissions"
         }, 
         {
             "location": "/database/", 
-            "text": "", 
-            "title": "Database"
+            "text": "Easy Database\n module presently has the functionalities for SQLite databse creation and migration. It will allow the developer to keep separate SQL DDL files for database creation and the migration. Developers don't need to put the DDL statements into the source code.", 
+            "title": "Easy Database"
+        }, 
+        {
+            "location": "/location/", 
+            "text": "For application which need to access the device location can use our \nEasy Location\n module, which will make it easy to get the information about the last known location like latitude, longutude and address. It also uses the \nEasy Permissions\n while requesting for the location data, which will make it easy with runtime permissions.\n\n\nDevelopers can use the \nLocationTracker\n class in the activity where they want to request for the permissions. This class works along with the \nPermissionRequestAdapter\n to handle the runtime permission requesting for devices with Marshmallow and above.", 
+            "title": "Easy Location"
         }
     ]
 }

@@ -8,7 +8,7 @@
   
   
   <link rel="shortcut icon" href="../img/favicon.ico">
-  <title>Network - Easy Android</title>
+  <title>Easy Network - Easy Android</title>
   <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
 
   <link rel="stylesheet" href="../css/theme.css" type="text/css" />
@@ -17,7 +17,7 @@
   
   <script>
     // Current page data
-    var mkdocs_page_name = "Network";
+    var mkdocs_page_name = "Easy Network";
     var mkdocs_page_input_path = "network.md";
     var mkdocs_page_url = "/network/";
   </script>
@@ -54,20 +54,34 @@
           
             <li class="toctree-l1 current">
 		
-    <a class="current" href="./">Network</a>
+    <a class="current" href="./">Easy Network</a>
     <ul class="subnav">
             
+    <li class="toctree-l2"><a href="#introduction">Introduction</a></li>
+    
+        <ul>
+        
+            <li><a class="toctree-l3" href="#eaxample">Eaxample</a></li>
+        
+        </ul>
+    
+
     </ul>
 	    </li>
           
             <li class="toctree-l1">
 		
-    <a class="" href="../permission/">Permissions</a>
+    <a class="" href="../permission/">Easy Permissions</a>
 	    </li>
           
             <li class="toctree-l1">
 		
-    <a class="" href="../database/">Database</a>
+    <a class="" href="../database/">Easy Database</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../location/">Easy Location</a>
 	    </li>
           
         </ul>
@@ -92,7 +106,7 @@
     
       
     
-    <li>Network</li>
+    <li>Easy Network</li>
     <li class="wy-breadcrumbs-aside">
       
     </li>
@@ -102,10 +116,12 @@
           <div role="main">
             <div class="section">
               
-                <p>During the running of application the network may go off and reconnect at multiple times, and we may want to get the status of the network instanataniously in <code>Activiy</code> or <code>Fragment</code>. <code>Activity</code> or <code>Fragment</code> can implement <code>NetworkChangeTrackerListener</code> and create instance of the <code>NetworkChangeTracker</code> to make it possible to get the instantanious update about the network change.</p>
+                <h2 id="introduction">Introduction</h2>
+<p>Developers can use the <strong>Easy Network</strong> module to get instant updates about the change in network state in <code>Activiy</code> or <code>Fragment</code>. <code>Activity</code> or <code>Fragment</code> can implement <code>NetworkChangeTrackerListener</code> and create instance of the <code>NetworkChangeTracker</code> to make it possible to get the instantanious update about the network change.</p>
 <p>Call <code>NetworkChangeTracker.startTracking(Context)</code> to start the network status tracking and <code>NetworkChangeTracker.stopTracking(Context)</code> when the tracking no more needed.</p>
-<p>Example for enabling tracking in <code>Activity</code> is given bellow.</p>
-<pre><code>public class MainActivity extends AppCompatActivity implements NetworkChangeTrackerListener{
+<h3 id="eaxample">Eaxample</h3>
+<p>Example below will show how to use <code>NetworkChangeTracker</code> in an <code>Activity</code>.</p>
+<pre><code>public class MainActivity extends AppCompatActivity implements NetworkChangeTrackerListener {
 
     NetworkChangeTracker tracker;
 
@@ -139,7 +155,7 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../permission/" class="btn btn-neutral float-right" title="Permissions">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../permission/" class="btn btn-neutral float-right" title="Easy Permissions">Next <span class="icon icon-circle-arrow-right"></span></a>
       
       
         <a href=".." class="btn btn-neutral" title="Home"><span class="icon icon-circle-arrow-left"></span> Previous</a>

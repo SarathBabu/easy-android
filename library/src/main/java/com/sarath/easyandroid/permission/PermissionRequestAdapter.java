@@ -1,4 +1,4 @@
-package com.sarath.easyandroid.permissions;
+package com.sarath.easyandroid.permission;
 
 import android.Manifest;
 import android.app.Activity;
@@ -11,6 +11,7 @@ import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.util.SparseArray;
 
 
@@ -23,26 +24,29 @@ import java.util.Vector;
 /**
  * Created by sarath on 23/2/17.
  *
- * Use @PermissionRequestAdapter{@link PermissionRequestAdapter} to request for permissions on
+ * Use @PermissionRequestAdapter{@link PermissionRequestAdapter} to requestAll for permissions on
  * Activity
  */
 
 public class PermissionRequestAdapter {
 
-    private static final int SETTINGS_ACTIVITY_REQUEST_CODE = 3272;
-    private final PermissionRequestCallback requester;
-    private List<PermissionDetails> permissionDetailsList;
+    private static final String TAG = PermissionRequestAdapter.class.getSimpleName();
+    private SparseArray<PermissionRequestCallback> requesters;
+    private SparseArray<PermissionDetails> permissionDetailsList;
     private SparseArray<List<String>> deniedPermissions = new SparseArray<>();
     private Vector<AlertDialog> dialogs = new Vector<>();
     private Activity activity;
 
-    /**
-     *
-     * @param requester callback for permission request
-     */
-    private PermissionRequestAdapter(PermissionRequestCallback requester) {
-        permissionDetailsList = new ArrayList<>();
-        this.requester = requester;
+    public enum PermissionType {
+        LOCATION,
+        CAMERA,
+        STORAGE,
+    }
+
+
+    private PermissionRequestAdapter() {
+        permissionDetailsList = new SparseArray<>();
+        requesters = new SparseArray<>();
     }
 
     /**
@@ -51,51 +55,57 @@ public class PermissionRequestAdapter {
     public static class Builder{
         private PermissionRequestAdapter requesterAdapter;
 
-        /**
-         *
-         * @param requester callback for permission request
-         */
-        public Builder(PermissionRequestCallback requester) {
-            requesterAdapter = new PermissionRequestAdapter(requester);
+        public Builder() {
+            requesterAdapter = new PermissionRequestAdapter();
         }
 
         /**
          *
-         * @param explanation tell why you want this permission
+         * @param activity Activity on which the permissions are asked.
+         * @return
+         */
+        public Builder on(Activity activity){
+            requesterAdapter.activity = activity;
+            return this;
+        }
+
+        /**
+         *
+         * @param rationale tell why you want this permission
          * @param isMandatory is this permission is mandatory. Mandatory permission will be asked
-         *                    on every permission request call by @{@link PermissionRequestAdapter} even if the user rejected the
+         *                    on every permission requestAll call by @{@link PermissionRequestAdapter} even if the user rejected the
          *                    permission earlier.
          * @return
          */
-        public Builder addLocationPermission(String explanation,boolean isMandatory){
-            requesterAdapter.permissionDetailsList.add(new PermissionDetails(Manifest.permission.ACCESS_FINE_LOCATION,
-                    explanation,isMandatory));
+        public Builder addLocationPermission(String rationale,boolean isMandatory){
+            requesterAdapter.permissionDetailsList.put(PermissionType.LOCATION.ordinal(),new PermissionDetails(Manifest.permission.ACCESS_FINE_LOCATION,
+                    rationale,isMandatory));
             return this;
         }
         /**
          *
-         * @param explanation tell why you want this permission
+         * @param rationale tell why you want this permission
          * @param isMandatory is this permission is mandatory. Mandatory permission will be asked
-         *                    on every permission request call by @{@link PermissionRequestAdapter} even if the user rejected the
+         *                    on every permission requestAll call by @{@link PermissionRequestAdapter} even if the user rejected the
          *                    permission earlier.
          * @return
          */
-        public Builder addCameraPermission(String explanation,boolean isMandatory){
-            requesterAdapter.permissionDetailsList.add(new PermissionDetails(Manifest.permission.CAMERA,
-                    explanation,isMandatory));
+        public Builder addCameraPermission(String rationale,boolean isMandatory){
+            requesterAdapter.permissionDetailsList.put(PermissionType.CAMERA.ordinal(),new PermissionDetails(Manifest.permission.CAMERA,
+                    rationale,isMandatory));
             return this;
         }
         /**
          *
-         * @param explanation tell why you want this permission
+         * @param rationale tell why you want this permission
          * @param isMandatory is this permission is mandatory. Mandatory permission will be asked
-         *                    on every permission request call by @{@link PermissionRequestAdapter} even if the user rejected the
+         *                    on every permission requestAll call by @{@link PermissionRequestAdapter} even if the user rejected the
          *                    permission earlier.
          * @return
          */
-        public Builder addStoragePermission(String explanation,boolean isMandatory){
-            requesterAdapter.permissionDetailsList.add(new PermissionDetails(Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                    explanation,isMandatory));
+        public Builder addStoragePermission(String rationale,boolean isMandatory){
+            requesterAdapter.permissionDetailsList.put(PermissionType.STORAGE.ordinal(),new PermissionDetails(Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    rationale,isMandatory));
             return this;
         }
 
@@ -104,21 +114,42 @@ public class PermissionRequestAdapter {
         }
     }
 
+    public boolean hasPermission(PermissionType permissionType){
+        return permissionDetailsList.indexOfKey(permissionType.ordinal())>=0;
+    }
+
     /**
-     * Request permissions which are set for the adapter
-     * @param activity activity from which the request is invoked
-     * @param requestCode request code
+     * Request for all permissions which are set for the adapter
+     * @param requester Callback fro this request
+     * @param requestCode requestAll code
      */
-    public void request(Activity activity, int requestCode){
-        this.activity = activity;
+    public void requestAll(PermissionRequestCallback requester, int requestCode){
+        requesters.put(requestCode,requester);
         ActivityCompat.requestPermissions(activity, getPermissionsIds(), requestCode);
     }
 
+
+    /**
+     * Request specific permission which is set on the adapter
+     * @param permissionType specify the permission request for
+     * @param requester Callback fro this request
+     * @param requestCode requestAll code
+     */
+    public void request(PermissionType permissionType, PermissionRequestCallback requester,
+                        int requestCode){
+        if(permissionDetailsList.get(permissionType.ordinal())==null) return;
+        requesters.put(requestCode,requester);
+        ActivityCompat.requestPermissions(activity,
+                new String[]{permissionDetailsList.get(permissionType.ordinal()).manifestId},
+                requestCode);
+    }
+
+
+
     private String[] getPermissionsIds(){
         String[] permissions = new String[permissionDetailsList.size()];
-        int i=0;
-        for(PermissionDetails details:permissionDetailsList){
-            permissions[i++]=details.manifestId;
+        for(int i=0;i<permissionDetailsList.size();i++){
+            permissions[i]=permissionDetailsList.valueAt(i).manifestId;
         }
         return permissions;
     }
@@ -132,11 +163,9 @@ public class PermissionRequestAdapter {
      * @param data
      */
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode){
-            case SETTINGS_ACTIVITY_REQUEST_CODE:
-                requester.onReturnFromSettings();
-                break;
-        }
+        PermissionRequestCallback callback = requesters.get(requestCode-1);
+        if(callback!=null)
+            callback.onReturnFromSettings();
     }
 
     /**
@@ -152,7 +181,9 @@ public class PermissionRequestAdapter {
             if(grantResults[i] != PackageManager.PERMISSION_GRANTED){
                 deniedPermissions.get(requestCode).add(permissions[i]);
             }else {
-                requester.permissionGranted(requestCode, permissions[i]);
+                PermissionRequestCallback callback = requesters.get(requestCode);
+                if(callback!=null)
+                    callback.permissionGranted(requestCode, permissions[i]);
             }
         }
         enforcePermissionsIfNeeded(requestCode);
@@ -168,10 +199,10 @@ public class PermissionRequestAdapter {
     }
 
     private void enforcePermissionsIfNeeded(int requestCode) {
-        openSettings(deniedPermissions.get(requestCode),0);
+        openSettings(deniedPermissions.get(requestCode),0,requestCode);
     }
 
-    private void openSettings(final List<String> deniedPermissions, final int index){
+    private void openSettings(final List<String> deniedPermissions, final int index, final int requestCode){
         if(deniedPermissions.size()-1 >= index){
             if(isMandatoryPermission(deniedPermissions.get(index))) {
                 AlertDialog alertDialog = new AlertDialog.Builder(activity)
@@ -184,24 +215,24 @@ public class PermissionRequestAdapter {
                                     Intent intent = new Intent();
                                     intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
                                     intent.setData(Uri.parse("package:" + getPackageName()));
-                                    activity.startActivityForResult(intent, SETTINGS_ACTIVITY_REQUEST_CODE);
+                                    activity.startActivityForResult(intent, requestCode+1);
                                 }catch (Exception e){
                                     Intent intent = new Intent();
                                     intent.setAction(Settings.ACTION_MANAGE_APPLICATIONS_SETTINGS);
-                                    activity.startActivityForResult(intent, SETTINGS_ACTIVITY_REQUEST_CODE);
+                                    activity.startActivityForResult(intent, requestCode+1);
                                 }
                             }
                         })
                         .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
                                 dialog.dismiss();
-                                openSettings(deniedPermissions, index + 1);
+                                openSettings(deniedPermissions, index + 1, requestCode);
                             }
                         }).create();
                 dialogs.add(alertDialog);
                 alertDialog.show();
             }else
-                openSettings(deniedPermissions, index+1);
+                openSettings(deniedPermissions, index+1, requestCode);
         }
     }
 
@@ -210,16 +241,16 @@ public class PermissionRequestAdapter {
     }
 
     private String getPermissionMessage(String s) {
-        for(PermissionDetails details:permissionDetailsList){
-            if(details.manifestId.equals(s))
-                return details.message;
+        for(int i=0; i<permissionDetailsList.size();i++){
+            if(permissionDetailsList.valueAt(i).manifestId.equals(s))
+                return permissionDetailsList.valueAt(i).message;
         }
         return null;
     }
 
     private boolean isMandatoryPermission(String s) {
-        for(PermissionDetails details:permissionDetailsList){
-            if(details.manifestId.equals(s) && details.isMandatory)
+        for(int i=0; i<permissionDetailsList.size();i++){
+            if(permissionDetailsList.valueAt(i).manifestId.equals(s) && permissionDetailsList.valueAt(i).isMandatory)
                 return true;
         }
         return false;

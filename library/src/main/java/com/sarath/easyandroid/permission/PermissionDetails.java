@@ -1,4 +1,4 @@
-package com.sarath.easyandroid.permissions;
+package com.sarath.easyandroid.permission;
 
 /**
  * Created by sarath on 23/2/17.

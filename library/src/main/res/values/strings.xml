@@ -2,4 +2,6 @@
     <string name="app_name">Library</string>
     <string name="open_settings">Open Settings</string>
     <string name="permission">Permission</string>
+    <string name="e_no_address_found">No address found</string>
+    <string name="e_nw_error_no_address">Network error. Unable to get address</string>
 </resources>

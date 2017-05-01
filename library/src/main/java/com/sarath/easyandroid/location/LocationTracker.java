@@ -1,22 +1,23 @@
 package com.sarath.easyandroid.location;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Parcel;
-import android.os.ResultReceiver;
-import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
-import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
+import com.sarath.easyandroid.R;
 import com.sarath.easyandroid.permission.PermissionRequestAdapter;
 import com.sarath.easyandroid.permission.PermissionRequestCallback;
 
@@ -29,6 +30,7 @@ public class LocationTracker implements GoogleApiClient.ConnectionCallbacks,
         PermissionRequestCallback, FetchAddressService.AddressResultReceiverCallback {
 
     private LocationTrackerListener listener;
+    private boolean useGPS;
 
     @Override
     public void onSuccess(String resultMessage) {
@@ -40,6 +42,10 @@ public class LocationTracker implements GoogleApiClient.ConnectionCallbacks,
     public void onError(String errorMessage) {
         if(listener!=null)
             listener.onAddressFound(errorMessage);
+    }
+
+    public void setUseGPS(boolean useGPS) {
+        this.useGPS = useGPS;
     }
 
     public interface LocationTrackerListener{
@@ -98,6 +104,12 @@ public class LocationTracker implements GoogleApiClient.ConnectionCallbacks,
             locationTracker.setNeedAddress(needAddress);
             return this;
         }
+
+        public Builder useGPS() {
+            locationTracker.setUseGPS(true);
+            return this;
+        }
+
         public Builder callback(LocationTrackerListener listener){
             locationTracker.listener = listener;
             return this;
@@ -168,5 +180,35 @@ public class LocationTracker implements GoogleApiClient.ConnectionCallbacks,
         FetchAddressService.start(getContext(),
                 new FetchAddressService.AddressResultReceiver(new Handler(),this),
                 location);
+    }
+
+
+    public static void onNoGPSSituation(final Context context) {
+        new AlertDialog.Builder(context)
+                .setTitle("Location Services Disabled")
+                .setMessage("Please turn your GPS on. Your location is required to determine the prayer timings. " +
+                        "It is strongly recommended that you continue as the app may not function properly without GPS services")
+                .setPositiveButton(R.string.ea_continue_label, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                        context.startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+
+                    }
+                })
+                .show();
+    }
+
+    public static  void onNoNetworkSituation(final Context context) {
+        new AlertDialog.Builder(context)
+                .setTitle("Internet connection")
+                .setMessage("Make sure Wi-Fi or mobile data is turned on. Internet services are required to fetch the address of location." +
+                        " It is recommended that you press continue as the app may not function properly without the internet services")
+                .setPositiveButton(R.string.ea_continue_label, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                        context.startActivity(new Intent(Settings.ACTION_SETTINGS));
+                    }
+                })
+                .show();
     }
 }

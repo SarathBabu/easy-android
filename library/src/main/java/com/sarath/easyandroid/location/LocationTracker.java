@@ -27,7 +27,9 @@ import com.sarath.easyandroid.permission.PermissionRequestCallback;
 
 public class LocationTracker implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
-        PermissionRequestCallback, FetchAddressService.AddressResultReceiverCallback {
+        PermissionRequestCallback,
+        FetchAddressService.AddressResultReceiverCallback,
+        FetchLocationService.LocationResultReceiverCallback{
 
     private LocationTrackerListener listener;
     private boolean useGPS;
@@ -39,9 +41,26 @@ public class LocationTracker implements GoogleApiClient.ConnectionCallbacks,
     }
 
     @Override
+    public void onSuccess(Location location) {
+        FetchAddressService.start(getContext(),
+                new FetchAddressService.AddressResultReceiver(new Handler(),this),
+                location);
+    }
+
+    @Override
     public void onError(String errorMessage) {
         if(listener!=null)
             listener.onAddressFound(errorMessage);
+    }
+
+    @Override
+    public void notGPS() {
+        showNoGPSDialog(mContext);
+    }
+
+    @Override
+    public void noNetwork() {
+        showNoNetwork(mContext);
     }
 
     public void setUseGPS(boolean useGPS) {
@@ -165,25 +184,11 @@ public class LocationTracker implements GoogleApiClient.ConnectionCallbacks,
                 this.mRequestAdapter.requestAll(this,REQUEST_CODE);
             return;
         }
-        Location mLastLocation  = LocationServices.FusedLocationApi.getLastLocation(
-                mGoogleApiClient);
-        if (mLastLocation != null) {
-            if(listener!=null) {
-                listener.onLocationFound(mLastLocation);
-                if (needAddress)
-                    getLocationInfo(mLastLocation);
-            }
-        }
-    }
-
-    public void getLocationInfo(@NonNull Location location) {
-        FetchAddressService.start(getContext(),
-                new FetchAddressService.AddressResultReceiver(new Handler(),this),
-                location);
+        FetchLocationService.start(mContext,new FetchLocationService.LocationResultReceiver(new Handler(),this));
     }
 
 
-    public static void onNoGPSSituation(final Context context) {
+    public static void showNoGPSDialog(final Context context) {
         new AlertDialog.Builder(context)
                 .setTitle("Location Services Disabled")
                 .setMessage("Please turn your GPS on. Your location is required to determine the prayer timings. " +
@@ -198,7 +203,7 @@ public class LocationTracker implements GoogleApiClient.ConnectionCallbacks,
                 .show();
     }
 
-    public static  void onNoNetworkSituation(final Context context) {
+    public static  void showNoNetwork(final Context context) {
         new AlertDialog.Builder(context)
                 .setTitle("Internet connection")
                 .setMessage("Make sure Wi-Fi or mobile data is turned on. Internet services are required to fetch the address of location." +

@@ -38,6 +38,7 @@ public class FetchAddressService extends IntentService{
     public interface AddressResultReceiverCallback{
         void onSuccess(String resultMessage);
         void onError(String errorMessage);
+        void noNetwork();
     }
 
     public static class AddressResultReceiver extends ResultReceiver {
@@ -100,6 +101,13 @@ public class FetchAddressService extends IntentService{
                             addressFragments));
         }
     }
+
+    private void deliverNoNetworkResultToReceiver(int resultCode) {
+        Bundle bundle = new Bundle();
+        bundle.putString(RESULT_DATA_KEY, "NoNetwork");
+        mReceiver.send(resultCode, bundle);
+    }
+
 
     private void deliverResultToReceiver(int resultCode, String message) {
         Bundle bundle = new Bundle();

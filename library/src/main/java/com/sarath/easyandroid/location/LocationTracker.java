@@ -10,29 +10,55 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.util.Log;
 
-import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.sarath.easyandroid.R;
-import com.sarath.easyandroid.permission.PermissionRequestAdapter;
-import com.sarath.easyandroid.permission.PermissionRequestCallback;
 
 /**
  * Created by sarath on 20/4/17.
  */
 
-public class LocationTracker implements GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener,
-        PermissionRequestCallback,
+public class LocationTracker implements
         FetchAddressService.AddressResultReceiverCallback,
-        FetchLocationService.LocationResultReceiverCallback{
+        FetchLocationService.LocationResultReceiverCallback,
+        GoogleApiClient.ConnectionCallbacks {
 
+    private final GoogleApiClient mGoogleApiClient;
     private LocationTrackerListener listener;
     private boolean useGPS;
+    private static final String TAG = LocationTracker.class.getSimpleName();
+    private final Context mContext;
+    private boolean needAddress = false;
+    private boolean requestPending = false;
+
+    private LocationListener singleUpdateListener = new LocationListener() {
+        @Override
+        public void onLocationChanged(Location location) {
+            notifyLocationUpdate(location);
+            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient,this);
+        }
+    };
+
+    private LocationListener continuousUpdateListener = new LocationListener() {
+        @Override
+        public void onLocationChanged(Location location) {
+            notifyLocationUpdate(location);
+        }
+    };
+
+    private void notifyLocationUpdate(Location location) {
+        listener.onLocationFound(location);
+        FetchAddressService.start(getContext(),
+                new FetchAddressService.AddressResultReceiver(new Handler(),this),
+                location);
+    }
+
 
     @Override
     public void onSuccess(String resultMessage) {
@@ -63,51 +89,28 @@ public class LocationTracker implements GoogleApiClient.ConnectionCallbacks,
         showNoNetwork(mContext);
     }
 
-    public void setUseGPS(boolean useGPS) {
+    private void setUseGPS(boolean useGPS) {
         this.useGPS = useGPS;
     }
 
-    public interface LocationTrackerListener{
-        void onLocationFound(Location location);
-        void onAddressFound(String address);
-        void onAddressError(String message);
-    }
-
-    private static final String TAG = LocationTracker.class.getSimpleName();
-    private final GoogleApiClient mGoogleApiClient;
-    private final Context mContext;
-    private final PermissionRequestAdapter mRequestAdapter;
-    private static final int REQUEST_CODE = 3144;
-    private boolean needAddress = false;
-
-    @Override
-    public void permissionGranted(int requestCode, String permission) {
-        getLocationInfo();
-    }
-
-    @Override
-    public void onReturnFromSettings() {
-        getLocationInfo();
-    }
-
-    public void setNeedAddress(boolean needAddress) {
+    private void setNeedAddress(boolean needAddress) {
         this.needAddress = needAddress;
     }
 
-    private enum ApiConnectionStatus {
-        NOT_CONNECTED,
-        CONNECTED,
-        CONNECTION_FAILED;
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        if(requestPending) makeSingleRequest();
     }
-    private ApiConnectionStatus apiConnectionStatus = ApiConnectionStatus.NOT_CONNECTED;
-    private boolean requestPending = false;
 
-    private LocationTracker(Context context, PermissionRequestAdapter requestAdapter) {
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    private LocationTracker(Context context) {
         this.mContext = context;
-        this.mRequestAdapter = requestAdapter;
         mGoogleApiClient = new GoogleApiClient.Builder(context)
                 .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
                 .build();
     }
@@ -115,8 +118,8 @@ public class LocationTracker implements GoogleApiClient.ConnectionCallbacks,
     public static class Builder{
         LocationTracker locationTracker;
 
-        public Builder(Context context, PermissionRequestAdapter requestAdapter) {
-            locationTracker = new LocationTracker(context, requestAdapter);
+        public Builder(Context context) {
+            locationTracker = new LocationTracker(context);
         }
 
         public Builder needAddress(boolean needAddress) {
@@ -143,35 +146,17 @@ public class LocationTracker implements GoogleApiClient.ConnectionCallbacks,
         return mContext;
     }
 
-    public void start() {
+    public void onStart() {
         mGoogleApiClient.connect();
     }
 
-    public void stop() {
+    public void onStop() {
         mGoogleApiClient.disconnect();
-        apiConnectionStatus=ApiConnectionStatus.NOT_CONNECTED;
     }
 
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        apiConnectionStatus = ApiConnectionStatus.CONNECTED;
-        if(requestPending) {
-            getLocationInfo();
-        }
-    }
 
-    @Override
-    public void onConnectionSuspended(int i) {
-        apiConnectionStatus = ApiConnectionStatus.NOT_CONNECTED;
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        apiConnectionStatus = ApiConnectionStatus.CONNECTION_FAILED;
-    }
-
-    public void getLocationInfo() {
-        if(apiConnectionStatus!=ApiConnectionStatus.CONNECTED) {
+    public void makeSingleRequest() {
+        if(!mGoogleApiClient.isConnected()) {
             requestPending = true;
             return;
         }
@@ -180,11 +165,29 @@ public class LocationTracker implements GoogleApiClient.ConnectionCallbacks,
                 PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) !=
                 PackageManager.PERMISSION_GRANTED) {
-            if(this.mRequestAdapter.hasPermission(PermissionRequestAdapter.PermissionType.LOCATION))
-                this.mRequestAdapter.requestAll(this,REQUEST_CODE);
-            return;
+            listener.onLocationPermissionsDisabled();
+        }else {
+            Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            if(location ==null){
+                LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient,
+                        LocationRequest.create().setFastestInterval(0),singleUpdateListener);
+            }
         }
-        FetchLocationService.start(mContext,new FetchLocationService.LocationResultReceiver(new Handler(),this));
+    }
+
+    public void makeUpdateRequest() {
+        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)!=
+                PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) !=
+                PackageManager.PERMISSION_GRANTED) {
+            listener.onLocationPermissionsDisabled();
+        }else {
+            Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            if(location ==null){
+                LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient,
+                        LocationRequest.create().setFastestInterval(0),continuousUpdateListener);
+            }
+        }
     }
 
 

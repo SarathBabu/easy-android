@@ -9,11 +9,15 @@ import android.util.Log;
 import android.view.View;
 
 import com.sarath.easyandroid.location.LocationTracker;
+import com.sarath.easyandroid.location.LocationTrackerListener;
 import com.sarath.easyandroid.permission.PermissionRequestAdapter;
+import com.sarath.easyandroid.permission.PermissionRequestCallback;
 
-public class MainActivity extends AppCompatActivity implements LocationTracker.LocationTrackerListener {
+public class MainActivity extends AppCompatActivity implements LocationTrackerListener,PermissionRequestCallback {
 
     private static final String TAG = MainActivity.class.getSimpleName();
+    private static final int REQUEST_CODE = 3144;
+
     LocationTracker locationTracker;
     PermissionRequestAdapter requestAdapter;
     @Override
@@ -30,22 +34,18 @@ public class MainActivity extends AppCompatActivity implements LocationTracker.L
                 .build();
     }
 
-
-
     @Override
     protected void onStart() {
         super.onStart();
-        locationTracker.start();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        locationTracker.stop();
     }
 
     public void onGetLocationClicked(View view) {
-        locationTracker.getLocationInfo();
+        locationTracker.makeSingleRequest();
     }
 
     @Override
@@ -73,5 +73,30 @@ public class MainActivity extends AppCompatActivity implements LocationTracker.L
     @Override
     public void onAddressError(String message) {
         Log.d(TAG, message);
+    }
+
+    @Override
+    public void onLocationPermissionsDisabled() {
+        requestAdapter.requestAll(this,REQUEST_CODE);
+    }
+
+    @Override
+    public void onLocationProviderDisabled() {
+
+    }
+
+    @Override
+    public void onNetworkDisabled() {
+
+    }
+
+    @Override
+    public void permissionGranted(int requestCode, String permission) {
+        locationTracker.makeSingleRequest();
+    }
+
+    @Override
+    public void onReturnFromSettings() {
+        locationTracker.makeSingleRequest();
     }
 }

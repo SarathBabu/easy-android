@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity implements LocationTrackerLi
                 .on(this)
                 .addLocationPermission("We want location",true)
                 .build();
-        locationTracker =new LocationTracker.Builder(this,requestAdapter)
+        locationTracker =new LocationTracker.Builder(this)
                 .needAddress(true)
                 .callback(this)
                 .build();
@@ -98,5 +98,9 @@ public class MainActivity extends AppCompatActivity implements LocationTrackerLi
     @Override
     public void onReturnFromSettings() {
         locationTracker.makeSingleRequest();
+    }
+
+    public void onOpenNextActiityClicked(View view) {
+
     }
 }

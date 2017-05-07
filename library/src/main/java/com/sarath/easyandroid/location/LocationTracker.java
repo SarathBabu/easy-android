@@ -26,7 +26,6 @@ import com.sarath.easyandroid.R;
 
 public class LocationTracker implements
         FetchAddressService.AddressResultReceiverCallback,
-        FetchLocationService.LocationResultReceiverCallback,
         GoogleApiClient.ConnectionCallbacks {
 
     private final GoogleApiClient mGoogleApiClient;
@@ -54,6 +53,7 @@ public class LocationTracker implements
 
     private void notifyLocationUpdate(Location location) {
         listener.onLocationFound(location);
+        if(needAddress)
         FetchAddressService.start(getContext(),
                 new FetchAddressService.AddressResultReceiver(new Handler(),this),
                 location);
@@ -66,22 +66,11 @@ public class LocationTracker implements
             listener.onAddressFound(resultMessage);
     }
 
-    @Override
-    public void onSuccess(Location location) {
-        FetchAddressService.start(getContext(),
-                new FetchAddressService.AddressResultReceiver(new Handler(),this),
-                location);
-    }
 
     @Override
     public void onError(String errorMessage) {
         if(listener!=null)
             listener.onAddressFound(errorMessage);
-    }
-
-    @Override
-    public void notGPS() {
-        showNoGPSDialog(mContext);
     }
 
     @Override

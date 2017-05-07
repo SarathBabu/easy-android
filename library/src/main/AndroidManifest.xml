@@ -10,7 +10,7 @@
         <service android:name=".location.FetchAddressService"
             android:exported="false"/>
 
-        <service android:name=".location.FetchLocationService"
+        <service android:name=".location.EALocationService"
             android:exported="false"/>
     </application>
 

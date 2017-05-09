@@ -12,7 +12,6 @@ import android.os.Handler;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
-import android.util.Log;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
@@ -21,17 +20,15 @@ import com.google.android.gms.location.LocationServices;
 import com.sarath.easyandroid.R;
 
 /**
- * Created by sarath on 20/4/17.
+ * Created by sarath with 20/4/17.
  */
 
-public class LocationTracker implements
-        FetchAddressService.AddressResultReceiverCallback,
-        GoogleApiClient.ConnectionCallbacks {
+public class EALocationTracker {
 
     private final GoogleApiClient mGoogleApiClient;
-    private LocationTrackerListener listener;
+    private EALocationTrackerListener listener;
     private boolean useGPS;
-    private static final String TAG = LocationTracker.class.getSimpleName();
+    private static final String TAG = EALocationTracker.class.getSimpleName();
     private final Context mContext;
     private boolean needAddress = false;
     private boolean requestPending = false;
@@ -44,39 +41,47 @@ public class LocationTracker implements
         }
     };
 
-    private LocationListener continuousUpdateListener = new LocationListener() {
+    private EALocationAddressService.AddressResultReceiverCallback  callback = new EALocationAddressService.AddressResultReceiverCallback() {
         @Override
-        public void onLocationChanged(Location location) {
-            notifyLocationUpdate(location);
+        public void onSuccess(String resultMessage) {
+            if(listener!=null)
+                listener.onAddressFound(resultMessage);
+        }
+
+        @Override
+        public void onError(String errorMessage) {
+            if(listener!=null)
+                listener.onAddressFound(errorMessage);
+        }
+
+        @Override
+        public void noNetwork() {
+            listener.onNetworkDisabled();
+        }
+    };
+
+    private GoogleApiClient.ConnectionCallbacks callbacks = new GoogleApiClient.ConnectionCallbacks() {
+        @Override
+        public void onConnected(@Nullable Bundle bundle) {
+            if(requestPending) singleUpdateRequest();
+        }
+
+        @Override
+        public void onConnectionSuspended(int i) {
+
         }
     };
 
     private void notifyLocationUpdate(Location location) {
-        listener.onLocationFound(location);
+        if(listener!=null)
+            listener.onLocationFound(location);
         if(needAddress)
-        FetchAddressService.start(getContext(),
-                new FetchAddressService.AddressResultReceiver(new Handler(),this),
-                location);
+            EALocationAddressService.start(getContext(),
+                    new EALocationAddressService.AddressResultReceiver(new Handler(),callback),
+                    location);
     }
 
 
-    @Override
-    public void onSuccess(String resultMessage) {
-        if(listener!=null)
-            listener.onAddressFound(resultMessage);
-    }
-
-
-    @Override
-    public void onError(String errorMessage) {
-        if(listener!=null)
-            listener.onAddressFound(errorMessage);
-    }
-
-    @Override
-    public void noNetwork() {
-        showNoNetwork(mContext);
-    }
 
     private void setUseGPS(boolean useGPS) {
         this.useGPS = useGPS;
@@ -86,48 +91,43 @@ public class LocationTracker implements
         this.needAddress = needAddress;
     }
 
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        if(requestPending) makeSingleRequest();
+    private void setLocationTrackerListener(EALocationTrackerListener listener) {
+        this.listener = listener;
     }
 
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
-
-    private LocationTracker(Context context) {
+    public EALocationTracker(Context context) {
         this.mContext = context;
         mGoogleApiClient = new GoogleApiClient.Builder(context)
-                .addConnectionCallbacks(this)
+                .addConnectionCallbacks(callbacks)
                 .addApi(LocationServices.API)
                 .build();
     }
 
+
     public static class Builder{
-        LocationTracker locationTracker;
+        EALocationTracker EALocationTracker;
 
         public Builder(Context context) {
-            locationTracker = new LocationTracker(context);
+            EALocationTracker = new EALocationTracker(context);
         }
 
         public Builder needAddress(boolean needAddress) {
-            locationTracker.setNeedAddress(needAddress);
+            EALocationTracker.setNeedAddress(needAddress);
             return this;
         }
 
-        public Builder useGPS() {
-            locationTracker.setUseGPS(true);
+        public Builder useGps(boolean useGps) {
+            EALocationTracker.setUseGPS(useGps);
             return this;
         }
 
-        public Builder callback(LocationTrackerListener listener){
-            locationTracker.listener = listener;
+        public Builder callback(EALocationTrackerListener listener){
+            EALocationTracker.setLocationTrackerListener(listener);
             return this;
         }
 
-        public LocationTracker build(){
-            return locationTracker;
+        public EALocationTracker build(){
+            return EALocationTracker;
         }
     }
 
@@ -144,7 +144,7 @@ public class LocationTracker implements
     }
 
 
-    public void makeSingleRequest() {
+    public void singleUpdateRequest() {
         if(!mGoogleApiClient.isConnected()) {
             requestPending = true;
             return;
@@ -159,32 +159,17 @@ public class LocationTracker implements
             Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
             if(location ==null){
                 LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient,
-                        LocationRequest.create().setFastestInterval(0),singleUpdateListener);
+                        LocationRequest.create().setInterval(0),singleUpdateListener);
+            }else {
+               notifyLocationUpdate(location);
             }
         }
     }
 
-    public void makeUpdateRequest() {
-        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)!=
-                PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) !=
-                PackageManager.PERMISSION_GRANTED) {
-            listener.onLocationPermissionsDisabled();
-        }else {
-            Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-            if(location ==null){
-                LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient,
-                        LocationRequest.create().setFastestInterval(0),continuousUpdateListener);
-            }
-        }
-    }
-
-
-    public static void showNoGPSDialog(final Context context) {
+    public static void showNoGPSDialog(final Context context, String rationale) {
         new AlertDialog.Builder(context)
-                .setTitle("Location Services Disabled")
-                .setMessage("Please turn your GPS on. Your location is required to determine the prayer timings. " +
-                        "It is strongly recommended that you continue as the app may not function properly without GPS services")
+                .setTitle("Location Services is Disabled")
+                .setMessage(rationale)
                 .setPositiveButton(R.string.ea_continue_label, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
@@ -195,11 +180,10 @@ public class LocationTracker implements
                 .show();
     }
 
-    public static  void showNoNetwork(final Context context) {
+    public static  void showNoNetwork(final Context context,String rationale) {
         new AlertDialog.Builder(context)
-                .setTitle("Internet connection")
-                .setMessage("Make sure Wi-Fi or mobile data is turned on. Internet services are required to fetch the address of location." +
-                        " It is recommended that you press continue as the app may not function properly without the internet services")
+                .setTitle("No Network")
+                .setMessage(rationale)
                 .setPositiveButton(R.string.ea_continue_label, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();

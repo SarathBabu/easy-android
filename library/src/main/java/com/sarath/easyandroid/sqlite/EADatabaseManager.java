@@ -16,7 +16,7 @@ import java.io.InputStreamReader;
  * Creates or upgrades database
  */
 
-public class DatabaseManager {
+public class EADatabaseManager {
 
     private static final String CREATE = "create_db";
     private static final String UPGRADE = "upgrade_db";
@@ -46,7 +46,7 @@ public class DatabaseManager {
         if (identifier > 0) {
             queryExecutor(context,identifier,database);
         } else {
-            Log.e(DatabaseManager.class.getClass().getName(),
+            Log.e(EADatabaseManager.class.getClass().getName(),
                     "impossible upgrade db file is not exist " + CREATE);
         }
     }
@@ -68,12 +68,12 @@ public class DatabaseManager {
             int identifier = context.getResources().getIdentifier(filename,
                     "raw", context.getPackageName());
             if (identifier > 0) {
-                Log.d(DatabaseManager.class.getClass().getName(),
+                Log.d(EADatabaseManager.class.getClass().getName(),
                         "Upgrading database from version " + oldVersion + " to "
                         + newVersion + ", which will destroy all old data");
                 queryExecutor(context,identifier,database);
             } else {
-                Log.e(DatabaseManager.class.getClass().getSimpleName(),
+                Log.e(EADatabaseManager.class.getClass().getSimpleName(),
                         "impossible upgrade db file is not exist " + filename);
             }
         }

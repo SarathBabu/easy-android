@@ -8,44 +8,48 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 
-import com.sarath.easyandroid.location.LocationTracker;
-import com.sarath.easyandroid.location.LocationTrackerListener;
-import com.sarath.easyandroid.permission.PermissionRequestAdapter;
-import com.sarath.easyandroid.permission.PermissionRequestCallback;
+import com.sarath.easyandroid.EasyAndroid;
+import com.sarath.easyandroid.location.EALocationTracker;
+import com.sarath.easyandroid.location.EALocationTrackerListener;
+import com.sarath.easyandroid.permission.EAPermissionManager;
+import com.sarath.easyandroid.permission.EAPermissionCallback;
 
-public class MainActivity extends AppCompatActivity implements LocationTrackerListener,PermissionRequestCallback {
+public class MainActivity extends AppCompatActivity implements EALocationTrackerListener,EAPermissionCallback {
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final int REQUEST_CODE = 3144;
 
-    LocationTracker locationTracker;
-    PermissionRequestAdapter requestAdapter;
+    EALocationTracker EALocationTracker;
+    EAPermissionManager requestAdapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        requestAdapter = new PermissionRequestAdapter.Builder()
-                .on(this)
+        requestAdapter = new EAPermissionManager.Builder()
+                .with(this)
                 .addLocationPermission("We want location",true)
                 .build();
-        locationTracker =new LocationTracker.Builder(this)
-                .needAddress(true)
+        EALocationTracker = new EALocationTracker.Builder(this)
                 .callback(this)
+                .useGps(true)
+                .needAddress(true)
                 .build();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
+        EALocationTracker.onStart();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+        EALocationTracker.onStop();
     }
 
     public void onGetLocationClicked(View view) {
-        locationTracker.makeSingleRequest();
+        EALocationTracker.singleUpdateRequest();
     }
 
     @Override
@@ -82,25 +86,25 @@ public class MainActivity extends AppCompatActivity implements LocationTrackerLi
 
     @Override
     public void onLocationProviderDisabled() {
-
+        EALocationTracker.showNoGPSDialog(this);
     }
 
     @Override
     public void onNetworkDisabled() {
-
+        EALocationTracker.showNoNetwork(this);
     }
 
     @Override
     public void permissionGranted(int requestCode, String permission) {
-        locationTracker.makeSingleRequest();
+        EALocationTracker.singleUpdateRequest();
     }
 
     @Override
     public void onReturnFromSettings() {
-        locationTracker.makeSingleRequest();
+        EALocationTracker.singleUpdateRequest();
     }
 
-    public void onOpenNextActiityClicked(View view) {
-
+    public void onOpenNextActivityClicked(View view) {
+        startActivity(new Intent(this, SecondActivity.class));
     }
 }

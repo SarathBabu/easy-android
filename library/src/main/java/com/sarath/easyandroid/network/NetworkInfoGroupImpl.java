@@ -3,7 +3,7 @@ package com.sarath.easyandroid.network;
 import android.net.ConnectivityManager;
 
 /**
- * Created by sarath on 23/2/17.
+ * Created by sarath with 23/2/17.
  */
 
 public class NetworkInfoGroupImpl implements NetworkInfoGroup {

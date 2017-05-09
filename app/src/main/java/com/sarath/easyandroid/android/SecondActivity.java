@@ -11,7 +11,7 @@ import com.sarath.easyandroid.location.EALocationServiceConnector;
 import com.sarath.easyandroid.location.NoLocationProviderError;
 
 /**
- * Created by sarath on 6/5/17.
+ * Created by sarath with 6/5/17.
  */
 
 public class SecondActivity extends Activity implements EALocationService.EALocationServiceListener {
@@ -47,6 +47,6 @@ public class SecondActivity extends Activity implements EALocationService.EALoca
 
     @Override
     public void onError(NoLocationProviderError error) {
-
+        Log.d(LOG_TAG, "Location service not enabled");
     }
 }

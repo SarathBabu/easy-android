@@ -29,7 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by sarath on 1/5/17.
+ * Created by sarath with 1/5/17.
  */
 
 public class EALocationService extends Service implements GoogleApiClient.ConnectionCallbacks,
@@ -123,8 +123,7 @@ public class EALocationService extends Service implements GoogleApiClient.Connec
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         Log.d(LOG_TAG, "onConnected");
-        if(requestPending)
-            getLocationInfo();
+        getLocationInfo();
     }
 
     @Override
@@ -139,6 +138,7 @@ public class EALocationService extends Service implements GoogleApiClient.Connec
 
     @Override
     public void onLocationChanged(Location location) {
+        Log.d(LOG_TAG, "onLocationChanged");
         notifyListeners(location);
     }
 

@@ -11,7 +11,6 @@ import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.util.SparseArray;
 
 
@@ -22,17 +21,17 @@ import java.util.List;
 import java.util.Vector;
 
 /**
- * Created by sarath on 23/2/17.
+ * Created by sarath with 23/2/17.
  *
- * Use @PermissionRequestAdapter{@link PermissionRequestAdapter} to requestAll for permissions on
+ * Use @EAPermissionManager{@link EAPermissionManager} to requestAll for permissions with
  * Activity
  */
 
-public class PermissionRequestAdapter {
+public class EAPermissionManager {
 
-    private static final String TAG = PermissionRequestAdapter.class.getSimpleName();
-    private SparseArray<PermissionRequestCallback> requesters;
-    private SparseArray<PermissionDetails> permissionDetailsList;
+    private static final String TAG = EAPermissionManager.class.getSimpleName();
+    private SparseArray<EAPermissionCallback> requesters;
+    private SparseArray<EAPermission> permissionDetailsList;
     private SparseArray<List<String>> deniedPermissions = new SparseArray<>();
     private Vector<AlertDialog> dialogs = new Vector<>();
     private Activity activity;
@@ -44,28 +43,28 @@ public class PermissionRequestAdapter {
     }
 
 
-    private PermissionRequestAdapter() {
+    private EAPermissionManager() {
         permissionDetailsList = new SparseArray<>();
         requesters = new SparseArray<>();
     }
 
     /**
-     * User builder to create  @{@link PermissionRequestAdapter} object.
+     * User builder to create  @{@link EAPermissionManager} object.
      */
     public static class Builder{
-        private PermissionRequestAdapter requesterAdapter;
+        private EAPermissionManager permissionManager;
 
         public Builder() {
-            requesterAdapter = new PermissionRequestAdapter();
+            permissionManager = new EAPermissionManager();
         }
 
         /**
          *
-         * @param activity Activity on which the permissions are asked.
+         * @param activity Activity with which the permissions are asked.
          * @return
          */
-        public Builder on(Activity activity){
-            requesterAdapter.activity = activity;
+        public Builder with(Activity activity){
+            permissionManager.activity = activity;
             return this;
         }
 
@@ -73,12 +72,12 @@ public class PermissionRequestAdapter {
          *
          * @param rationale tell why you want this permission
          * @param isMandatory is this permission is mandatory. Mandatory permission will be asked
-         *                    on every permission requestAll call by @{@link PermissionRequestAdapter} even if the user rejected the
+         *                    with every permission requestAll call by @{@link EAPermissionManager} even if the user rejected the
          *                    permission earlier.
          * @return
          */
         public Builder addLocationPermission(String rationale,boolean isMandatory){
-            requesterAdapter.permissionDetailsList.put(PermissionType.LOCATION.ordinal(),new PermissionDetails(Manifest.permission.ACCESS_FINE_LOCATION,
+            permissionManager.permissionDetailsList.put(PermissionType.LOCATION.ordinal(),new EAPermission(Manifest.permission.ACCESS_FINE_LOCATION,
                     rationale,isMandatory));
             return this;
         }
@@ -86,12 +85,12 @@ public class PermissionRequestAdapter {
          *
          * @param rationale tell why you want this permission
          * @param isMandatory is this permission is mandatory. Mandatory permission will be asked
-         *                    on every permission requestAll call by @{@link PermissionRequestAdapter} even if the user rejected the
+         *                    with every permission requestAll call by @{@link EAPermissionManager} even if the user rejected the
          *                    permission earlier.
          * @return
          */
         public Builder addCameraPermission(String rationale,boolean isMandatory){
-            requesterAdapter.permissionDetailsList.put(PermissionType.CAMERA.ordinal(),new PermissionDetails(Manifest.permission.CAMERA,
+            permissionManager.permissionDetailsList.put(PermissionType.CAMERA.ordinal(),new EAPermission(Manifest.permission.CAMERA,
                     rationale,isMandatory));
             return this;
         }
@@ -99,18 +98,18 @@ public class PermissionRequestAdapter {
          *
          * @param rationale tell why you want this permission
          * @param isMandatory is this permission is mandatory. Mandatory permission will be asked
-         *                    on every permission requestAll call by @{@link PermissionRequestAdapter} even if the user rejected the
+         *                    with every permission requestAll call by @{@link EAPermissionManager} even if the user rejected the
          *                    permission earlier.
          * @return
          */
         public Builder addStoragePermission(String rationale,boolean isMandatory){
-            requesterAdapter.permissionDetailsList.put(PermissionType.STORAGE.ordinal(),new PermissionDetails(Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            permissionManager.permissionDetailsList.put(PermissionType.STORAGE.ordinal(),new EAPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE,
                     rationale,isMandatory));
             return this;
         }
 
-        public PermissionRequestAdapter build(){
-            return requesterAdapter;
+        public EAPermissionManager build(){
+            return permissionManager;
         }
     }
 
@@ -123,19 +122,19 @@ public class PermissionRequestAdapter {
      * @param requester Callback fro this request
      * @param requestCode requestAll code
      */
-    public void requestAll(PermissionRequestCallback requester, int requestCode){
+    public void requestAll(EAPermissionCallback requester, int requestCode){
         requesters.put(requestCode,requester);
         ActivityCompat.requestPermissions(activity, getPermissionsIds(), requestCode);
     }
 
 
     /**
-     * Request specific permission which is set on the adapter
+     * Request specific permission which is set with the adapter
      * @param permissionType specify the permission request for
      * @param requester Callback fro this request
      * @param requestCode requestAll code
      */
-    public void request(PermissionType permissionType, PermissionRequestCallback requester,
+    public void request(PermissionType permissionType, EAPermissionCallback requester,
                         int requestCode){
         if(permissionDetailsList.get(permissionType.ordinal())==null) return;
         requesters.put(requestCode,requester);
@@ -163,7 +162,7 @@ public class PermissionRequestAdapter {
      * @param data
      */
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        PermissionRequestCallback callback = requesters.get(requestCode-1);
+        EAPermissionCallback callback = requesters.get(requestCode-1);
         if(callback!=null)
             callback.onReturnFromSettings();
     }
@@ -181,7 +180,7 @@ public class PermissionRequestAdapter {
             if(grantResults[i] != PackageManager.PERMISSION_GRANTED){
                 deniedPermissions.get(requestCode).add(permissions[i]);
             }else {
-                PermissionRequestCallback callback = requesters.get(requestCode);
+                EAPermissionCallback callback = requesters.get(requestCode);
                 if(callback!=null)
                     callback.permissionGranted(requestCode, permissions[i]);
             }

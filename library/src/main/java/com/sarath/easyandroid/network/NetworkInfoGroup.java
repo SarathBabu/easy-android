@@ -1,7 +1,7 @@
 package com.sarath.easyandroid.network;
 
 /**
- * Created by sarath on 23/2/17.
+ * Created by sarath with 23/2/17.
  */
 public interface NetworkInfoGroup {
     /**

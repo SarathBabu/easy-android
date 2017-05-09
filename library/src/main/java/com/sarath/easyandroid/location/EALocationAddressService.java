@@ -10,9 +10,12 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
 import android.text.TextUtils;
-import android.util.Log;
 
+import com.sarath.easyandroid.EasyAndroid;
 import com.sarath.easyandroid.R;
+import com.sarath.easyandroid.network.EANetworkStatusChecker;
+import com.sarath.easyandroid.network.NetworkInfo;
+import com.sarath.easyandroid.network.NetworkInfoGroup;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -20,18 +23,18 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Created by sarath on 20/4/17.
+ * Created by sarath with 20/4/17.
  */
 
-public class FetchAddressService extends IntentService{
+public class EALocationAddressService extends IntentService{
 
 
     private static final String LOCATION_DATA_EXTRA = "LocationDataExtra";
-    private static final int FAILURE_RESULT = 0;
-    public static final int SUCCESS_RESULT = 1;
+    private static final int FAILURE_RESULT_CODE = 0;
+    public static final int SUCCESS_RESULT_CODE = 1;
     public static final String RESULT_DATA_KEY = "ResultDataKey";
     private static final String RECEIVER = "Receiver";
-    private static final String TAG = FetchAddressService.class.getSimpleName();
+    private static final String TAG = EALocationAddressService.class.getSimpleName();
     private ResultReceiver mReceiver;
 
 
@@ -50,25 +53,28 @@ public class FetchAddressService extends IntentService{
         }
         @Override
         protected void onReceiveResult(int resultCode, Bundle resultData) {
-            String resultOutput = resultData.getString(FetchAddressService.RESULT_DATA_KEY);
-            if (resultCode == FetchAddressService.SUCCESS_RESULT) {
+            String resultOutput = resultData.getString(EALocationAddressService.RESULT_DATA_KEY);
+            if (resultCode == EALocationAddressService.SUCCESS_RESULT_CODE) {
                 callback.onSuccess(resultOutput);
             }else {
-                callback.onError(resultOutput);
+                if("NoNetwork".equals(resultOutput))
+                    callback.noNetwork();
+                else
+                    callback.onError(resultOutput);
             }
         }
     }
 
     public static void start(Context context,AddressResultReceiver receiver,
                              Location location){
-        Intent intent = new Intent(context, FetchAddressService.class);
+        Intent intent = new Intent(context, EALocationAddressService.class);
         intent.putExtra(RECEIVER, receiver);
         intent.putExtra(LOCATION_DATA_EXTRA, location);
         context.startService(intent);
     }
 
-    public FetchAddressService() {
-        super(FetchAddressService.class.getSimpleName());
+    public EALocationAddressService() {
+        super(EALocationAddressService.class.getSimpleName());
     }
 
     @Override
@@ -77,6 +83,14 @@ public class FetchAddressService extends IntentService{
         Location location = intent.getParcelableExtra(
                 LOCATION_DATA_EXTRA);
         mReceiver = intent.getParcelableExtra(RECEIVER);
+
+        NetworkInfoGroup networkInfoGroup = new EANetworkStatusChecker(this)
+                .getStatus();
+        if(!networkInfoGroup.getNetworkInfo(NetworkInfo.MOBILE).isAvailable() &&
+                !networkInfoGroup.getNetworkInfo(NetworkInfo.WIFI).isAvailable()){
+            deliverNoNetworkResultToReceiver(FAILURE_RESULT_CODE);
+        }
+
         List<Address> addresses = null;
         try {
             addresses = geocoder.getFromLocation(
@@ -84,19 +98,20 @@ public class FetchAddressService extends IntentService{
                     location.getLongitude(),
                     1);
         } catch (IOException e){
-            deliverResultToReceiver(FAILURE_RESULT, getString(R.string.e_nw_error_no_address));
+            deliverResultToReceiver(FAILURE_RESULT_CODE, getString(R.string.e_nw_error_no_address));
+            return;
         }catch(IllegalArgumentException ioException) {
 
         }
         if (addresses == null || addresses.size()  == 0) {
-            deliverResultToReceiver(FAILURE_RESULT, getString(R.string.e_no_address_found));
+            deliverResultToReceiver(FAILURE_RESULT_CODE, getString(R.string.e_no_address_found));
         } else {
             Address address = addresses.get(0);
             ArrayList<String> addressFragments = new ArrayList<String>();
             for(int i = 0; i <= address.getMaxAddressLineIndex(); i++) {
                 addressFragments.add(address.getAddressLine(i));
             }
-            deliverResultToReceiver(SUCCESS_RESULT,
+            deliverResultToReceiver(SUCCESS_RESULT_CODE,
                     TextUtils.join(System.getProperty("line.separator"),
                             addressFragments));
         }

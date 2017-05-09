@@ -1,14 +1,14 @@
 package com.sarath.easyandroid.permission;
 
 /**
- * Created by sarath on 23/2/17.
+ * Created by sarath with 23/2/17.
  *
  */
 
-public interface PermissionRequestCallback {
+public interface EAPermissionCallback {
     /**
-     * Callback for {@link PermissionRequestAdapter#requestAll(PermissionRequestCallback, int)}} and
-     * {@link PermissionRequestAdapter#request(PermissionRequestAdapter.PermissionType, PermissionRequestCallback, int)}
+     * Callback for {@link EAPermissionManager#requestAll(EAPermissionCallback, int)}} and
+     * {@link EAPermissionManager#request(EAPermissionManager.PermissionType, EAPermissionCallback, int)}
      *
      * @param requestCode the requestAll code of the permission requestAll call
      * @param permission the permission which is granted one of the permission

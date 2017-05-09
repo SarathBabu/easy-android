@@ -9,7 +9,7 @@ import android.os.IBinder;
 import static com.sarath.easyandroid.location.EALocationService.UPDATE_ITERVAL;
 
 /**
- * Created by sarath on 6/5/17.
+ * Created by sarath with 6/5/17.
  */
 
 public class EALocationServiceConnector{

@@ -86,12 +86,12 @@ public class MainActivity extends AppCompatActivity implements EALocationTracker
 
     @Override
     public void onLocationProviderDisabled() {
-        EALocationTracker.showNoGPSDialog(this);
+        EALocationTracker.showNoGPSDialog(this, "Enable Location service");
     }
 
     @Override
     public void onNetworkDisabled() {
-        EALocationTracker.showNoNetwork(this);
+        EALocationTracker.showNoNetwork(this,"Enable network");
     }
 
     @Override

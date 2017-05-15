@@ -2,18 +2,13 @@ package com.sarath.easyandroid.location;
 
 import android.Manifest;
 import android.app.Service;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Binder;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.ResultReceiver;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -100,11 +95,20 @@ public class EALocationService extends Service implements GoogleApiClient.Connec
             return;
         }
         requestPending = false;
+        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        try {
+            if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) &&
+                    !locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+                notifyListeners(new NoLocationProviderEnabledError());
+                return;
+            }
+        }catch (Exception e){return;}
+
         if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION)!=
                 PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) !=
                 PackageManager.PERMISSION_GRANTED) {
-            notifyListeners(new NoLocationProviderError());
+            notifyListeners(new NoLocationPermissionEnabledError());
             return;
         }
         LocationServices.FusedLocationApi.requestLocationUpdates(
@@ -112,9 +116,15 @@ public class EALocationService extends Service implements GoogleApiClient.Connec
 
     }
 
-    private void notifyListeners(NoLocationProviderError noLocationProviderError) {
+    private void notifyListeners(NoLocationProviderEnabledError noLocationProviderEnabledError) {
         for(EALocationServiceListener listener:listeners){
-            listener.onError(noLocationProviderError);
+            listener.onError(noLocationProviderEnabledError);
+        }
+    }
+
+    private void notifyListeners(NoLocationPermissionEnabledError noLocationPermissionEnabledError) {
+        for(EALocationServiceListener listener:listeners){
+            listener.onError(noLocationPermissionEnabledError);
         }
     }
 
@@ -149,6 +159,7 @@ public class EALocationService extends Service implements GoogleApiClient.Connec
 
     public interface EALocationServiceListener {
         void onLocationUpdate(Location location);
-        void onError(NoLocationProviderError error);
+        void onError(NoLocationPermissionEnabledError error);
+        void onError(NoLocationProviderEnabledError error);
     }
 }

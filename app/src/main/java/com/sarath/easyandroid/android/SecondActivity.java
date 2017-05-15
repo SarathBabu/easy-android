@@ -8,7 +8,8 @@ import android.util.Log;
 
 import com.sarath.easyandroid.location.EALocationService;
 import com.sarath.easyandroid.location.EALocationServiceConnector;
-import com.sarath.easyandroid.location.NoLocationProviderError;
+import com.sarath.easyandroid.location.NoLocationPermissionEnabledError;
+import com.sarath.easyandroid.location.NoLocationProviderEnabledError;
 
 /**
  * Created by sarath with 6/5/17.
@@ -46,7 +47,12 @@ public class SecondActivity extends Activity implements EALocationService.EALoca
     }
 
     @Override
-    public void onError(NoLocationProviderError error) {
+    public void onError(NoLocationPermissionEnabledError error) {
         Log.d(LOG_TAG, "Location service not enabled");
+    }
+
+    @Override
+    public void onError(NoLocationProviderEnabledError error) {
+
     }
 }

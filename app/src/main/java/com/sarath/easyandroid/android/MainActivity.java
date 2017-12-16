@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 
-import com.sarath.easyandroid.EasyAndroid;
 import com.sarath.easyandroid.location.EALocationTracker;
 import com.sarath.easyandroid.location.EALocationTrackerListener;
 import com.sarath.easyandroid.permission.EAPermissionManager;
@@ -20,14 +19,15 @@ public class MainActivity extends AppCompatActivity implements EALocationTracker
     private static final int REQUEST_CODE = 3144;
 
     EALocationTracker EALocationTracker;
-    EAPermissionManager requestAdapter;
+    EAPermissionManager eaPermissionManager;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        requestAdapter = new EAPermissionManager.Builder()
+        eaPermissionManager = new EAPermissionManager.Builder()
                 .with(this)
-                .addLocationPermission("We want location",true)
+                .addCameraPermission(getString(R.string.we_want_camera),false)
+                //.addLocationPermission("We want location",true)
                 .build();
         EALocationTracker = new EALocationTracker.Builder(this)
                 .callback(this)
@@ -55,13 +55,13 @@ public class MainActivity extends AppCompatActivity implements EALocationTracker
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        requestAdapter.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        eaPermissionManager.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        requestAdapter.onActivityResult(requestCode, resultCode, data);
+        eaPermissionManager.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
@@ -81,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements EALocationTracker
 
     @Override
     public void onLocationPermissionsDisabled() {
-        requestAdapter.requestAll(this,REQUEST_CODE);
+        eaPermissionManager.requestAll(this,REQUEST_CODE);
     }
 
     @Override
